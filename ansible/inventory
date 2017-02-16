@@ -1,0 +1,127 @@
+worker2	public_ip=172.30.1.107
+frontend2	public_ip=172.30.1.25
+frontend1	public_ip=172.30.1.76
+storage	public_ip=172.30.1.99
+worker1	public_ip=172.30.1.101
+tcp-proxy	public_ip=172.30.1.67
+master3	public_ip=172.30.1.161
+master2	public_ip=172.30.1.121
+master1	public_ip=172.30.1.192
+nfs	public_ip=172.30.1.77
+core3	public_ip=172.30.1.164
+core2	public_ip=172.30.1.105
+core1	public_ip=172.30.1.147
+highlandpark	public_ip=172.30.1.74
+dns	public_ip=172.30.1.113
+proxy	public_ip=172.30.1.24
+log	public_ip=172.30.1.46
+docker-builder	public_ip=172.30.1.58
+
+[all:vars]
+private_ip="{{ public_ip }}"
+ansible_ssh_host="{{ public_ip }}"
+
+###
+# default setup
+###
+# VM 1: nfs server
+# VM 2: storage services (mysql/postgres/git)
+# VM 3: highlandpark rabbitmq server
+# VM 4/5/6: distillery core services / rosebank consul server
+# VM 7/8/9/13: microtool docker swarm - manager (incl. worker)
+# VM 10: microtool docker swarm - worker
+# VM 11/12: frontend reverse proxies
+# VM 14: frontend tcp proxys
+# VM 15/16: frontend DNS nodes / in-deployment squid proxies
+# VM 17: docker builder node
+# VM 18: log server node
+
+# in generale in the following the structure of the hosts is
+#   FQDN Key1=Val1 Key2=Val2 ...
+# instead of only 'public_ip' as parameter keyes also additionally 'private_ip' as well
+# as 'ansible_ssh_host' _could_ be specified:
+#   FQDN public_ip=... private_ip=...
+# Only needed if they would differ from each other otherwise 'public_ip' is sufficient!
+
+###
+# storage services
+###
+[nfs]
+nfs
+
+[mysql]
+storage
+
+[postgres]
+storage
+
+[git]
+storage
+
+[highlandpark]
+highlandpark
+
+###
+# distillery setup
+###
+[distillery]
+core1
+core2
+core3
+
+###
+# rosebank/consul setup
+###
+[rosebank]
+core1
+core2
+core3
+
+###
+# docker swarm setup
+###
+[swarm_manager]
+master1
+master2
+master3
+
+[swarm_worker]
+worker1
+worker2
+
+# VM 15/16: frontend DNS nodes / in-deployment squid proxies
+# VM 17: docker builder node
+# VM 18: log server node
+
+###
+# frontend services
+###
+[frontend]
+frontend1
+frontend2
+
+[tcp_proxy]
+tcp-proxy
+
+###
+# dns and squid proxy service
+###
+[dns]
+dns
+proxy
+
+[proxy]
+dns
+proxy
+
+###
+# docker build host
+###
+[docker_builder]
+docker-builder
+
+###
+# log server (elasticsearch + kibana)
+###
+[log]
+log
